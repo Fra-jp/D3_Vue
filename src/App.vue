@@ -1,17 +1,45 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <h1>D3 Visualization within Vue</h1>
+    <svg width="800" height="600" id="viz"></svg>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+const d3 = require('d3');
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+
+  },
+
+  mounted(){
+    let numbers = [100,250,160,80,200, 300];
+
+    // select visual enviroment: SvG
+    const svg = d3.select('#viz');
+
+    // join my data
+    const rects = svg.selectAll('rect')
+      .data(numbers)
+      .join('rect');
+
+    // update: join()
+    const scaleLenght = d3.scaleLinear()
+        .domain([0, d3.max(numbers)])
+        .range([0, 600]);
+
+    const scalePos = function(d,i){
+      return 20 * i + 20;
+    }
+
+    rects
+      .attr('x', 20)
+      .attr('height', 13)
+      .attr('y', scalePos)
+      .attr('width', scaleLenght);
+
   }
 }
 </script>
