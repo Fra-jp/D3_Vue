@@ -15,7 +15,7 @@ export default {
   },
 
   mounted(){
-    let numbers = [100, 250, 160, 80, 200, 300, 120, 240];
+    let numbers = [100, 250, 160, 80, 200, 300, 120, 240, 50];
 
     // select visual enviroment: SvG
     const svg = d3.select('#viz');
