@@ -1,7 +1,21 @@
 <template>
   <div id="app">
-    <h1>D3 Visualization within Vue</h1>
-    <svg width="800" height="600" id="viz"></svg>
+    <b-container>
+      <b-row>
+        <b-col>
+          <h1>D3 Visualization within Vue</h1>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col><p>Click to shuffle the number</p></b-col>
+        <b-col><b-button @click="shuffleNumbers">Shuffler</b-button></b-col>
+      </b-row>
+      <b-row>
+        <b-col>
+          <svg width="800" height="600" id="viz"></svg>
+        </b-col>
+      </b-row>
+    </b-container>
   </div>
 </template>
 
@@ -14,54 +28,72 @@ export default {
 
   },
 
-  mounted(){
-    let numbers = [100, 250, 160, 80, 200, 300, 120, 240, 50];
+  data(){
+    return {
+      numbers: [100, 250, 160, 80, 2000],
+    }
+  },
 
-    // select visual enviroment: SvG
-    const svg = d3.select('#viz');
+  mounted() {
+    this.refreshChart(this.numbers);
+  },
 
-    const scaleLength = d3.scaleLinear()
-        .domain([0, d3.max(numbers)])
-        .range([0, 600]);
+  watch:{
+    numbers(newVal){
+      this.refreshChart(newVal);
+    }
+  },
 
-    /*const scalePos = function(d,i){
-      return 20 * i + 20;
-    }*/
+  methods: {
+    refreshChart(listOfNumbers) {
+      // select visual enviroment: SvG
+      const svg = d3.select('#viz');
 
-    const scalePos = d3.scaleBand()
-        .domain(d3.range(numbers.length))
-        .range([0,300])
-        .round(true)
-        .paddingInner(0.05) // distanza tra i vari rettangoli
-        .paddingOuter(0.05);
+      const scaleLength = d3.scaleLinear()
+          .domain([0, d3.max(listOfNumbers)])
+          .range([0, 600]);
+      const lAxis = d3.axisTop(scaleLength);
 
-    // ************ Creating the Bars ***********
-    // join my data
-    const rects = svg.selectAll('rect')
-      .data(numbers)
-      .join('rect');
+      const scalePos = d3.scaleBand()
+          .domain(d3.range(listOfNumbers.length))
+          .range([0, 300])
+          .round(true)
+          .paddingInner(0.05) // distanza tra i vari rettangoli
+          .paddingOuter(0.05);
 
-    // update: join()
-    rects
-      .attr('x', 20)
-      .attr('height', scalePos.bandwidth())
-      .attr('y', (d,i) => scalePos(i))
-      .attr('width', scaleLength)
-      .attr('fill', '#ac0404');
+      // ************ Create g groups **************
+      svg.selectAll('g.lAxis')
+          .data([0])
+          .join('g')
+          .attr('class', 'lAxis')
+          .attr('transform', 'translate(20, 20)')
+          .call(lAxis);
 
-    // ************* Creating the text labels *************
-    const labels = svg.selectAll('text')
-        .data(numbers)
-        .join('text');
+      const gs = svg.selectAll('g.bars')
+          .data(listOfNumbers)
+          .join('g').attr('class', 'bars');
 
-    labels
-        .text((d) => d)
-        .attr('x', scaleLength)
-        .attr('y', (d,i) => scalePos(i))
-        //.attr('dy', 10)
-        .attr('dy', scalePos.bandwidth()/2)
-        .attr('dx', -20)
-  }
+      gs.attr('transform', (d, i) => `translate(20, ${30 + scalePos(i)})`);
+
+      gs.selectAll('rect')
+          .data(d => [d])
+          .join('rect')
+          .attr('fill', "#ac0404")
+          .attr('height', scalePos.bandwidth())
+          .attr('width', scaleLength);
+
+      gs.selectAll('text')
+          .data(d => [d])
+          .join('text')
+          .text((d) => d)
+          .attr('x', scaleLength)
+          .attr('y', scalePos.bandwidth() / 2);
+    },
+    shuffleNumbers() {
+      const N = Math.round(Math.random() + 10);
+      this.numbers = d3.range(N).map(d => Math.round(d+Math.random()*400));
+    }
+  },
 }
 </script>
 
