@@ -90,7 +90,7 @@ export default {
           .attr('y', scalePos.bandwidth() / 2);
     },
     shuffleNumbers() {
-      const N = Math.round(Math.random() + 10);
+      const N = Math.round(Math.random() + 5);
       this.numbers = d3.range(N).map(d => Math.round(d+Math.random()*400));
     }
   },
