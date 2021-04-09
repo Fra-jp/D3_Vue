@@ -12,7 +12,7 @@
       </b-row>
       <b-row>
         <b-col>
-          <svg width="800" height="600" id="viz"></svg>
+          <svg :width="width" :height="height" id="viz"></svg>
         </b-col>
       </b-row>
     </b-container>
@@ -22,6 +22,8 @@
 <script>
 const d3 = require('d3');
 
+import chart from "@/assets/js/barChartVisualization";
+
 export default {
   name: 'App',
   components: {
@@ -30,7 +32,9 @@ export default {
 
   data(){
     return {
-      numbers: [100, 250, 160, 80, 2000],
+      numbers: [100, 250, 160, 80, 200],
+      width: 650,
+      height: 200,
     }
   },
 
@@ -47,47 +51,10 @@ export default {
   methods: {
     refreshChart(listOfNumbers) {
       // select visual enviroment: SvG
-      const svg = d3.select('#viz');
+      const barChart = chart().width(this.width).height(this.height);
 
-      const scaleLength = d3.scaleLinear()
-          .domain([0, d3.max(listOfNumbers)])
-          .range([0, 600]);
-      const lAxis = d3.axisTop(scaleLength);
+      d3.select('#viz').datum(listOfNumbers).call(barChart);
 
-      const scalePos = d3.scaleBand()
-          .domain(d3.range(listOfNumbers.length))
-          .range([0, 300])
-          .round(true)
-          .paddingInner(0.05) // distanza tra i vari rettangoli
-          .paddingOuter(0.05);
-
-      // ************ Create g groups **************
-      svg.selectAll('g.lAxis')
-          .data([0])
-          .join('g')
-          .attr('class', 'lAxis')
-          .attr('transform', 'translate(20, 20)')
-          .call(lAxis);
-
-      const gs = svg.selectAll('g.bars')
-          .data(listOfNumbers)
-          .join('g').attr('class', 'bars');
-
-      gs.attr('transform', (d, i) => `translate(20, ${30 + scalePos(i)})`);
-
-      gs.selectAll('rect')
-          .data(d => [d])
-          .join('rect')
-          .attr('fill', "#ac0404")
-          .attr('height', scalePos.bandwidth())
-          .attr('width', scaleLength);
-
-      gs.selectAll('text')
-          .data(d => [d])
-          .join('text')
-          .text((d) => d)
-          .attr('x', scaleLength)
-          .attr('y', scalePos.bandwidth() / 2);
     },
     shuffleNumbers() {
       const N = Math.round(Math.random() + 5);
